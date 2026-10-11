@@ -10,10 +10,10 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const activeUsers = new Set();
-const channels = ['general-chat', 'blood-pit'];
+let channels = ['general-chat', 'lounge'];
 const messages = {
     'general-chat': [],
-    'blood-pit': []
+    'lounge': []
 };
 
 io.on('connection', (socket) => {
@@ -60,6 +60,14 @@ io.on('connection', (socket) => {
             channels[index] = cleanName;
             messages[cleanName] = messages[oldName] || [];
             delete messages[oldName];
+            io.emit('update-channels', channels);
+        }
+    });
+
+    socket.on('delete-channel', (channelName) => {
+        if (channels.length > 1 && channels.includes(channelName)) {
+            channels = channels.filter(ch => ch !== channelName);
+            delete messages[channelName];
             io.emit('update-channels', channels);
         }
     });
