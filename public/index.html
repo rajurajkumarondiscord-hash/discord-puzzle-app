@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Gate & Bloody Chat</title>
+    <title>Puzzle Gate & Blue Gradient Chat</title>
     <style>
         :root {
-            --bg-dark: #120507;
-            --bg-sidebar: #1a080a;
-            --bg-server: #0b0203;
-            --text-normal: #f0d5d8;
-            --text-muted: #a67a80;
-            --accent: #8b0000;
-            --accent-hover: #b22222;
-            --input-bg: #240a0d;
-            --blood-glow: rgba(139, 0, 0, 0.4);
+            --bg-dark: #090a0f;
+            --bg-sidebar: #0d111a;
+            --bg-server: #05070a;
+            --text-normal: #e2e8f0;
+            --text-muted: #8892b0;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --input-bg: #111827;
+            --blue-glow: rgba(37, 99, 235, 0.35);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-normal); height: 100vh; overflow: hidden; }
@@ -25,19 +25,19 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #0b0203, #240a0d);
+            background: linear-gradient(135deg, #05070a, #1e3a8a);
         }
         .puzzle-card {
             background: var(--bg-sidebar);
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 8px 32px var(--blood-glow);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px var(--blue-glow);
             border: 1px solid var(--accent);
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
-        .puzzle-card h2 { margin-bottom: 20px; color: #ff4d4d; text-shadow: 0 0 10px var(--blood-glow); }
+        .puzzle-card h2 { margin-bottom: 20px; color: #60a5fa; text-shadow: 0 0 10px var(--blue-glow); }
         .puzzle-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
         .puzzle-card input {
             width: 100%;
@@ -45,25 +45,25 @@
             margin-bottom: 15px;
             background: var(--input-bg);
             border: 1px solid var(--accent);
-            border-radius: 4px;
+            border-radius: 6px;
             color: #fff;
             font-size: 16px;
         }
-        .puzzle-card input:focus { outline: none; border-color: #ff4d4d; box-shadow: 0 0 8px var(--blood-glow); }
+        .puzzle-card input:focus { outline: none; border-color: #60a5fa; box-shadow: 0 0 8px var(--blue-glow); }
         .puzzle-card button {
             width: 100%;
             padding: 10px;
-            background: var(--accent);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             color: #fff;
             font-weight: bold;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.2s;
+            transition: filter 0.2s;
         }
-        .puzzle-card button:hover { background: var(--accent-hover); box-shadow: 0 0 12px var(--accent-hover); }
-        #error-msg { color: #ff6b6b; font-size: 13px; margin-top: 10px; }
+        .puzzle-card button:hover { filter: brightness(1.2); box-shadow: 0 0 12px var(--blue-glow); }
+        #error-msg { color: #f87171; font-size: 13px; margin-top: 10px; }
 
         /* Discord UI Layout */
         #chat-screen {
@@ -73,37 +73,38 @@
         }
         
         /* Servers Sidebar */
-        .servers-sidebar { background: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; border-right: 1px solid #2b0509; }
-        .server-icon { width: 48px; height: 48px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 0 10px var(--blood-glow); }
+        .servers-sidebar { background: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; border-right: 1px solid #1e293b; }
+        .server-icon { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 0 10px var(--blue-glow); }
 
         /* Channels Sidebar */
-        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #2b0509; }
+        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #1e293b; }
         .channels-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-        .add-channel-btn { background: none; border: 1px solid var(--accent); color: #ff6b6b; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .add-channel-btn { background: none; border: 1px solid var(--accent); color: #60a5fa; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .add-channel-btn:hover { background: var(--accent); color: white; }
 
         .channel-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex: 1; }
-        .channel-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
-        .channel-item:hover { background: #33080d; color: #fff; }
-        .channel-item.active { background: var(--accent); color: #fff; box-shadow: 0 0 8px var(--blood-glow); }
-        .channel-actions button { background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; opacity: 0.7; margin-left: 4px; }
+        .channel-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
+        .channel-item:hover { background: #1e293b; color: #fff; }
+        .channel-item.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 0 8px var(--blue-glow); }
+        .channel-actions { display: flex; gap: 4px; }
+        .channel-actions button { background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; opacity: 0.7; }
         .channel-actions button:hover { opacity: 1; }
 
         /* Main Chat Area */
-        .chat-main { display: flex; flex-direction: column; background: var(--bg-dark); height: 100vh; flex: 1; }
-        .chat-header { height: 48px; border-bottom: 1px solid #2b0509; display: flex; align-items: center; padding: 0 20px; font-weight: bold; font-size: 16px; color: #ff6b6b; box-shadow: 0 1px 4px rgba(139,0,0,0.2); }
+        .chat-main { display: flex; flex-direction: column; background: linear-gradient(135deg, #090a0f, #0f172a); height: 100vh; flex: 1; }
+        .chat-header { height: 48px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; padding: 0 20px; font-weight: bold; font-size: 16px; color: #60a5fa; box-shadow: 0 1px 4px rgba(37,99,235,0.2); }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         .message { display: flex; flex-direction: column; }
-        .message .msg-user { font-weight: 600; font-size: 14px; color: #ff8080; margin-bottom: 2px; }
+        .message .msg-user { font-weight: 600; font-size: 14px; color: #93c5fd; margin-bottom: 2px; }
         .message .msg-user span { font-weight: normal; font-size: 11px; color: var(--text-muted); margin-left: 6px; }
         .message .msg-text { font-size: 15px; color: var(--text-normal); word-break: break-word; line-height: 1.4; }
         .message.system-msg .msg-text { color: var(--text-muted); font-style: italic; font-size: 13px; border-left: 2px solid var(--accent); padding-left: 8px; }
 
         /* Chat Input & Emoji Picker */
         .chat-input-area { padding: 0 20px 24px 20px; position: relative; }
-        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; align-items: center; padding: 10px 18px; border: 1px solid #33080d; }
-        .chat-input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 8px var(--blood-glow); }
+        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; align-items: center; padding: 10px 18px; border: 1px solid #1e293b; }
+        .chat-input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 8px var(--blue-glow); }
         .chat-input-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: #fff; font-size: 15px; }
         
         .emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 6px; transition: transform 0.1s; }
@@ -119,19 +120,19 @@
             border-radius: 8px;
             padding: 10px;
             width: 240px;
-            box-shadow: 0 4px 16px var(--blood-glow);
+            box-shadow: 0 4px 16px var(--blue-glow);
             grid-template-columns: repeat(6, 1fr);
             gap: 6px;
             z-index: 100;
         }
         .emoji-picker span { font-size: 20px; cursor: pointer; text-align: center; padding: 4px; border-radius: 4px; }
-        .emoji-picker span:hover { background: #33080d; }
+        .emoji-picker span:hover { background: #1e293b; }
 
         /* Members Sidebar */
-        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #2b0509; overflow-y: auto; }
+        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #1e293b; overflow-y: auto; }
         .members-sidebar h4 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
         .member-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 14px; color: var(--text-muted); }
-        .member-dot { width: 8px; height: 8px; background: #8b0000; box-shadow: 0 0 6px #ff0000; border-radius: 50%; }
+        .member-dot { width: 8px; height: 8px; background: #3b82f6; box-shadow: 0 0 6px #60a5fa; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -171,18 +172,18 @@
             <div class="chat-input-area">
                 <!-- Emoji Picker Popover -->
                 <div class="emoji-picker" id="emoji-picker">
-                    <span onclick="insertEmoji('💀')">💀</span>
-                    <span onclick="insertEmoji('🩸')">🩸</span>
-                    <span onclick="insertEmoji('🔪')">🔪</span>
-                    <span onclick="insertEmoji('🦇')">🦇</span>
-                    <span onclick="insertEmoji('🔥')">🔥</span>
-                    <span onclick="insertEmoji('👻')">👻</span>
-                    <span onclick="insertEmoji('😈')">😈</span>
-                    <span onclick="insertEmoji('🖤')">🖤</span>
-                    <span onclick="insertEmoji('💔')">💔</span>
                     <span onclick="insertEmoji('😀')">😀</span>
                     <span onclick="insertEmoji('😂')">😂</span>
+                    <span onclick="insertEmoji('🔥')">🔥</span>
                     <span onclick="insertEmoji('👍')">👍</span>
+                    <span onclick="insertEmoji('💙')">💙</span>
+                    <span onclick="insertEmoji('🚀')">🚀</span>
+                    <span onclick="insertEmoji('✨')">✨</span>
+                    <span onclick="insertEmoji('😎')">😎</span>
+                    <span onclick="insertEmoji('🎉')">🎉</span>
+                    <span onclick="insertEmoji('💯')">💯</span>
+                    <span onclick="insertEmoji('⚡')">⚡</span>
+                    <span onclick="insertEmoji('💀')">💀</span>
                 </div>
                 <div class="chat-input-wrapper">
                     <input type="text" id="message-input" placeholder="Message #general-chat" onkeypress="handleKeyPress(event)" autocomplete="off">
@@ -271,6 +272,7 @@
                         <span># ${ch}</span>
                         <div class="channel-actions">
                             <button onclick="event.stopPropagation(); renameChannel('${ch}')" title="Rename">✏️</button>
+                            ${allChannels.length > 1 ? `<button onclick="event.stopPropagation(); deleteChannel('${ch}')" title="Delete">🗑️</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -303,6 +305,12 @@
             const newName = prompt(`Rename channel #${oldName} to:`, oldName);
             if (newName && newName !== oldName) {
                 socket.emit('rename-channel', { oldName, newName });
+            }
+        }
+
+        function deleteChannel(chName) {
+            if (confirm(`Are you sure you want to delete #${chName}?`)) {
+                socket.emit('delete-channel', chName);
             }
         }
 
