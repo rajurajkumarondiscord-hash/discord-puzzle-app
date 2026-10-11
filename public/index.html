@@ -78,12 +78,19 @@
 
         /* Channels Sidebar */
         .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #2b0509; }
-        .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
-        .channel-item { padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
+        .channels-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .add-channel-btn { background: none; border: 1px solid var(--accent); color: #ff6b6b; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .add-channel-btn:hover { background: var(--accent); color: white; }
+
+        .channel-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex: 1; }
+        .channel-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
         .channel-item:hover { background: #33080d; color: #fff; }
         .channel-item.active { background: var(--accent); color: #fff; box-shadow: 0 0 8px var(--blood-glow); }
+        .channel-actions button { background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; opacity: 0.7; margin-left: 4px; }
+        .channel-actions button:hover { opacity: 1; }
 
-        /* Main Chat Area (Expanded) */
+        /* Main Chat Area */
         .chat-main { display: flex; flex-direction: column; background: var(--bg-dark); height: 100vh; flex: 1; }
         .chat-header { height: 48px; border-bottom: 1px solid #2b0509; display: flex; align-items: center; padding: 0 20px; font-weight: bold; font-size: 16px; color: #ff6b6b; box-shadow: 0 1px 4px rgba(139,0,0,0.2); }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
@@ -93,10 +100,32 @@
         .message .msg-text { font-size: 15px; color: var(--text-normal); word-break: break-word; line-height: 1.4; }
         .message.system-msg .msg-text { color: var(--text-muted); font-style: italic; font-size: 13px; border-left: 2px solid var(--accent); padding-left: 8px; }
 
-        .chat-input-area { padding: 0 20px 24px 20px; }
-        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; padding: 12px 18px; border: 1px solid #33080d; }
+        /* Chat Input & Emoji Picker */
+        .chat-input-area { padding: 0 20px 24px 20px; position: relative; }
+        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; align-items: center; padding: 10px 18px; border: 1px solid #33080d; }
         .chat-input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 8px var(--blood-glow); }
         .chat-input-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: #fff; font-size: 15px; }
+        
+        .emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 6px; transition: transform 0.1s; }
+        .emoji-btn:hover { transform: scale(1.2); }
+        
+        .emoji-picker {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px;
+            width: 240px;
+            box-shadow: 0 4px 16px var(--blood-glow);
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            z-index: 100;
+        }
+        .emoji-picker span { font-size: 20px; cursor: pointer; text-align: center; padding: 4px; border-radius: 4px; }
+        .emoji-picker span:hover { background: #33080d; }
 
         /* Members Sidebar */
         .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #2b0509; overflow-y: auto; }
@@ -128,17 +157,36 @@
 
         <!-- Channels Sidebar -->
         <div class="channels-sidebar">
-            <h3>Text Channels</h3>
-            <div class="channel-item active"># general-chat</div>
+            <div class="channels-header">
+                <h3>Text Channels</h3>
+                <button class="add-channel-btn" onclick="createNewChannel()" title="Add Channel">+</button>
+            </div>
+            <div class="channel-list" id="channel-list-container"></div>
         </div>
 
         <!-- Chat Main Container -->
         <div class="chat-main">
-            <div class="chat-header"># general-chat</div>
+            <div class="chat-header" id="current-channel-title"># general-chat</div>
             <div class="chat-messages" id="messages-container"></div>
             <div class="chat-input-area">
+                <!-- Emoji Picker Popover -->
+                <div class="emoji-picker" id="emoji-picker">
+                    <span onclick="insertEmoji('💀')">💀</span>
+                    <span onclick="insertEmoji('🩸')">🩸</span>
+                    <span onclick="insertEmoji('🔪')">🔪</span>
+                    <span onclick="insertEmoji('🦇')">🦇</span>
+                    <span onclick="insertEmoji('🔥')">🔥</span>
+                    <span onclick="insertEmoji('👻')">👻</span>
+                    <span onclick="insertEmoji('😈')">😈</span>
+                    <span onclick="insertEmoji('🖤')">🖤</span>
+                    <span onclick="insertEmoji('💔')">💔</span>
+                    <span onclick="insertEmoji('😀')">😀</span>
+                    <span onclick="insertEmoji('😂')">😂</span>
+                    <span onclick="insertEmoji('👍')">👍</span>
+                </div>
                 <div class="chat-input-wrapper">
                     <input type="text" id="message-input" placeholder="Message #general-chat" onkeypress="handleKeyPress(event)" autocomplete="off">
+                    <button class="emoji-btn" onclick="toggleEmojiPicker()" title="Add Emoji">😀</button>
                 </div>
             </div>
         </div>
@@ -150,10 +198,13 @@
         </div>
     </div>
 
-    <!-- Include Socket.io Client Library -->
+    <!-- Socket.io & Logic -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        let currentChannel = 'general-chat';
+        let allChannels = [];
+        let channelMessages = {};
 
         function tryEnter() {
             const username = document.getElementById('username-input').value;
@@ -170,14 +221,30 @@
             document.getElementById('error-msg').innerText = msg;
         });
 
-        socket.on('load-history', (messages) => {
-            const container = document.getElementById('messages-container');
-            container.innerHTML = '';
-            messages.forEach(msg => appendMessage(msg));
+        socket.on('init-data', ({ channels, messages }) => {
+            allChannels = channels;
+            channelMessages = messages;
+            renderChannels();
+            renderMessages();
         });
 
-        socket.on('new-message', (msg) => {
-            appendMessage(msg);
+        socket.on('update-channels', (channels) => {
+            allChannels = channels;
+            if (!allChannels.includes(currentChannel)) {
+                currentChannel = allChannels[0] || 'general-chat';
+            }
+            renderChannels();
+            renderMessages();
+        });
+
+        socket.on('new-message', ({ channel, message }) => {
+            if (!channelMessages[channel]) channelMessages[channel] = [];
+            channelMessages[channel].push(message);
+            if (channelMessages[channel].length > 100) channelMessages[channel].shift();
+            
+            if (channel === currentChannel) {
+                appendMessage(message);
+            }
         });
 
         socket.on('update-users', (users) => {
@@ -194,12 +261,69 @@
             });
         });
 
+        function renderChannels() {
+            const container = document.getElementById('channel-list-container');
+            container.innerHTML = '';
+            allChannels.forEach(ch => {
+                const isActive = ch === currentChannel;
+                container.innerHTML += `
+                    <div class="channel-item ${isActive ? 'active' : ''}" onclick="switchChannel('${ch}')">
+                        <span># ${ch}</span>
+                        <div class="channel-actions">
+                            <button onclick="event.stopPropagation(); renameChannel('${ch}')" title="Rename">✏️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('current-channel-title').innerText = `# ${currentChannel}`;
+            document.getElementById('message-input').placeholder = `Message #${currentChannel}`;
+        }
+
+        function switchChannel(ch) {
+            currentChannel = ch;
+            renderChannels();
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            const messages = channelMessages[currentChannel] || [];
+            messages.forEach(msg => appendMessage(msg));
+        }
+
+        function createNewChannel() {
+            const name = prompt('Enter new channel name:');
+            if (name) {
+                socket.emit('create-channel', name);
+            }
+        }
+
+        function renameChannel(oldName) {
+            const newName = prompt(`Rename channel #${oldName} to:`, oldName);
+            if (newName && newName !== oldName) {
+                socket.emit('rename-channel', { oldName, newName });
+            }
+        }
+
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emoji-picker');
+            picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('message-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emoji-picker').style.display = 'none';
+        }
+
         function handleKeyPress(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById('message-input');
                 const text = input.value.trim();
                 if (text) {
-                    socket.emit('send-message', text);
+                    socket.emit('send-message', { channel: currentChannel, text });
                     input.value = '';
                 }
             }
