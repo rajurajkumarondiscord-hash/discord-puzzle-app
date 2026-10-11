@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Gate & Chat</title>
+    <style>
+        :root {
+            --bg-dark: #313338;
+            --bg-sidebar: #2b2d31;
+            --bg-server: #1e1f22;
+            --text-normal: #dbdee1;
+            --text-muted: #949ba4;
+            --accent: #5865f2;
+            --accent-hover: #4752c4;
+            --input-bg: #383a40;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-normal); height: 100vh; overflow: hidden; }
+
+        #puzzle-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1f22, #2b2d31);
+        }
+        .puzzle-card {
+            background: #2b2d31;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .puzzle-card h2 { margin-bottom: 20px; color: #fff; }
+        .puzzle-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
+        .puzzle-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: var(--input-bg);
+            border: 1px solid #1e1f22;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+        }
+        .puzzle-card button {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .puzzle-card button:hover { background: var(--accent-hover); }
+        #error-msg { color: #f23f43; font-size: 13px; margin-top: 10px; }
+
+        #chat-screen {
+            display: none;
+            height: 100vh;
+            grid-template-columns: 240px 1fr 240px;
+        }
+        
+        .servers-sidebar { background: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; }
+        .server-icon { width: 48px; height: 48px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; }
+
+        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #1f2023; }
+        .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+        .channel-item { padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; }
+        .channel-item.active { background: #404249; color: #fff; }
+
+        .chat-main { display: flex; flex-direction: column; background: var(--bg-dark); height: 100vh; }
+        .chat-header { height: 48px; border-bottom: 1px solid #1f2023; display: flex; align-items: center; padding: 0 16px; font-weight: bold; font-size: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { display: flex; flex-direction: column; }
+        .message .msg-user { font-weight: 600; font-size: 14px; color: #fff; margin-bottom: 2px; }
+        .message .msg-user span { font-weight: normal; font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+        .message .msg-text { font-size: 14px; color: var(--text-normal); word-break: break-word; }
+        .message.system-msg .msg-text { color: var(--text-muted); font-style: italic; font-size: 13px; }
+
+        .chat-input-area { padding: 0 16px 24px 16px; }
+        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; padding: 10px 16px; }
+        .chat-input-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: #fff; font-size: 15px; }
+
+        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #1f2023; overflow-y: auto; }
+        .members-sidebar h4 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
+        .member-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 14px; color: var(--text-muted); }
+        .member-dot { width: 8px; height: 8px; background: #23a55a; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="puzzle-screen">
+        <div class="puzzle-card">
+            <h2>Access Gate</h2>
+            <p>What is my favourite number?</p>
+            <input type="text" id="username-input" placeholder="Your Username..." autocomplete="off">
+            <input type="number" id="puzzle-input" placeholder="Enter number..." autocomplete="off">
+            <button onclick="tryEnter()">Enter Website</button>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <div id="chat-screen">
+        <div class="servers-sidebar">
+            <div class="server-icon" title="Main Server">PS</div>
+        </div>
+        <div class="channels-sidebar">
+            <h3>Text Channels</h3>
+            <div class="channel-item active"># general-chat</div>
+        </div>
+        <div class="chat-main">
+            <div class="chat-header"># general-chat</div>
+            <div class="chat-messages" id="messages-container"></div>
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="message-input" placeholder="Message #general-chat" onkeypress="handleKeyPress(event)" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div class="members-sidebar">
+            <h4>Online — <span id="member-count">0</span></h4>
+            <div id="members-list"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function tryEnter() {
+            const username = document.getElementById('username-input').value;
+            const answer = document.getElementById('puzzle-input').value;
+            socket.emit('join-chat', { username, answer });
+        }
+
+        socket.on('auth-success', () => {
+            document.getElementById('puzzle-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'grid';
+        });
+
+        socket.on('auth-error', (msg) => {
+            document.getElementById('error-msg').innerText = msg;
+        });
+
+        socket.on('load-history', (messages) => {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg));
+        });
+
+        socket.on('new-message', (msg) => {
+            appendMessage(msg);
+        });
+
+        socket.on('update-users', (users) => {
+            const listContainer = document.getElementById('members-list');
+            document.getElementById('member-count').innerText = users.length;
+            listContainer.innerHTML = '';
+            users.forEach(user => {
+                listContainer.innerHTML += `
+                    <div class="member-item">
+                        <div class="member-dot"></div>
+                        <span>${user}</span>
+                    </div>
+                `;
+            });
+        });
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('message-input');
+                const text = input.value.trim();
+                if (text) {
+                    socket.emit('send-message', text);
+                    input.value = '';
+                }
+            }
+        }
+
+        function appendMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const msgDiv = document.createElement('div');
+            if (msg.system) {
+                msgDiv.className = 'message system-msg';
+                msgDiv.innerHTML = `<div class="msg-text">${msg.text}</div>`;
+            } else {
+                msgDiv.className = 'message';
+                msgDiv.innerHTML = `
+                    <div class="msg-user">${msg.user}<span>Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+                    <div class="msg-text">${msg.text}</div>
+                `;
+            }
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
