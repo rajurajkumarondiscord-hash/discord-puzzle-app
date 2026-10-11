@@ -157,9 +157,11 @@
 
     <!-- Discord UI Chat Screen -->
     <div id="chat-screen">
-        <!-- Servers Sidebar -->
+        <!-- Servers Sidebar with lovlys web page Link -->
         <div class="servers-sidebar">
-            <div class="server-icon" title="Main Server">PS</div>
+            <a href="https://discord-puzzle-app.onrender.com" target="_blank" style="text-decoration: none;" title="lovlys web page">
+                <div class="server-icon">L</div>
+            </a>
         </div>
 
         <!-- Channels & Games Sidebar -->
@@ -229,7 +231,6 @@
         let allChannels = [];
         let channelMessages = {};
         
-        // Custom Games & Web shortcuts list
         let gamesList = [
             { name: 'Smash Karts', url: 'https://smashkarts.io' },
             { name: 'Poki Games', url: 'https://poki.com' }
@@ -386,7 +387,7 @@
                 emojiPicker.style.display = 'none';
                 gifPicker.style.display = gifPicker.style.display === 'block' ? 'none' : 'block';
                 if (gifPicker.style.display === 'block') {
-                    searchTenorGIFs('trending'); // load initial trending GIFs
+                    searchTenorGIFs('trending');
                 }
             }
         }
@@ -398,7 +399,6 @@
             document.getElementById('emoji-picker').style.display = 'none';
         }
 
-        // Tenor GIF Integration using public API key
         async function searchTenorGIFs(query) {
             const container = document.getElementById('gif-results-container');
             container.innerHTML = 'Loading...';
