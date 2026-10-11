@@ -77,13 +77,13 @@
         .server-icon { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 0 10px var(--blue-glow); }
 
         /* Channels Sidebar */
-        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #1e293b; }
-        .channels-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #1e293b; overflow-y: auto; }
+        .channels-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .channels-sidebar h3 { font-size: 13px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
         .add-channel-btn { background: none; border: 1px solid var(--accent); color: #60a5fa; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .add-channel-btn:hover { background: var(--accent); color: white; }
 
-        .channel-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex: 1; }
+        .channel-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
         .channel-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
         .channel-item:hover { background: #1e293b; color: #fff; }
         .channel-item.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 0 8px var(--blue-glow); }
@@ -156,13 +156,25 @@
             <div class="server-icon" title="Main Server">PS</div>
         </div>
 
-        <!-- Channels Sidebar -->
+        <!-- Channels & Games Sidebar -->
         <div class="channels-sidebar">
             <div class="channels-header">
                 <h3>Text Channels</h3>
                 <button class="add-channel-btn" onclick="createNewChannel()" title="Add Channel">+</button>
             </div>
             <div class="channel-list" id="channel-list-container"></div>
+
+            <div class="channels-header" style="margin-top: 10px;">
+                <h3>Games</h3>
+            </div>
+            <div class="channel-list">
+                <div class="channel-item" onclick="window.open('https://smashkarts.io', '_blank')">
+                    <span>🎮 Smash Karts</span>
+                </div>
+                <div class="channel-item" onclick="window.open('https://poki.com', '_blank')">
+                    <span>🕹️ Poki Games</span>
+                </div>
+            </div>
         </div>
 
         <!-- Chat Main Container -->
