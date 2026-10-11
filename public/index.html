@@ -191,4 +191,405 @@
             border: 1px solid var(--accent);
             border-radius: 8px;
             padding: 12px;
-            width:
+            width: 320px;
+            box-shadow: 0 4px 16px var(--theme-glow);
+            z-index: 100;
+        }
+        .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+        .emoji-grid span { font-size: 20px; cursor: pointer; text-align: center; padding: 4px; border-radius: 4px; }
+        .emoji-grid span:hover { background: var(--input-bg); }
+
+        .gif-popup input { width: 100%; padding: 8px; background: var(--input-bg); border: 1px solid var(--accent); border-radius: 4px; color: #fff; margin-bottom: 8px; outline: none; }
+        .gif-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 220px; overflow-y: auto; }
+        .gif-results img { width: 100%; height: 95px; object-fit: cover; border-radius: 4px; cursor: pointer; transition: transform 0.1s; }
+        .gif-results img:hover { transform: scale(1.03); border: 1px solid var(--accent); }
+
+        /* Members Sidebar */
+        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid var(--border-color); overflow-y: auto; }
+        .members-sidebar h4 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
+        .member-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 14px; color: var(--text-muted); }
+        .member-dot { width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 6px var(--accent); border-radius: 50%; }
+    </style>
+</head>
+<body>
+
+    <!-- Puzzle Gate Screen -->
+    <div id="puzzle-screen">
+        <div class="puzzle-card">
+            <h2>Access Gate</h2>
+            <p>What is my favourite number?</p>
+            <input type="text" id="username-input" placeholder="Your Username..." autocomplete="off">
+            <input type="number" id="puzzle-input" placeholder="Enter number..." autocomplete="off">
+            <button onclick="tryEnter()">Enter Website</button>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Discord UI Chat Screen -->
+    <div id="chat-screen">
+        <!-- Servers Sidebar -->
+        <div class="servers-sidebar">
+            <a href="https://discord-puzzle-app.onrender.com" target="_blank" style="text-decoration: none;" title="lovlys web page">
+                <div class="server-icon">L</div>
+            </a>
+        </div>
+
+        <!-- Channels & Games Sidebar -->
+        <div class="channels-sidebar">
+            <div class="channels-header">
+                <h3>Text Channels</h3>
+                <button class="add-channel-btn" onclick="createNewChannel()" title="Add Channel">+</button>
+            </div>
+            <div class="channel-list" id="channel-list-container"></div>
+
+            <div class="channels-header" style="margin-top: 10px;">
+                <h3>Games & Links</h3>
+                <button class="add-channel-btn" onclick="addGameShortcut()" title="Add Website Shortcut">+</button>
+            </div>
+            <div class="channel-list" id="games-list-container"></div>
+        </div>
+
+        <!-- Chat Main Container -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <span id="current-channel-title"># general-chat</span>
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); margin-right: 6px;">Theme:</span>
+                    <select class="theme-select" id="theme-selector" onchange="changeTheme(this.value)">
+                        <option value="default">Electric Blue</option>
+                        <option value="black">Pitch Black</option>
+                        <option value="red">Bloody Red</option>
+                        <option value="pink">Hot Pink</option>
+                        <option value="purple">Royal Purple</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chat-messages" id="messages-container"></div>
+            <div class="chat-input-area">
+                <!-- Emoji Picker Popup -->
+                <div class="picker-popup" id="emoji-picker">
+                    <div class="emoji-grid">
+                        <span onclick="insertEmoji('😀')">😀</span>
+                        <span onclick="insertEmoji('😂')">😂</span>
+                        <span onclick="insertEmoji('🔥')">🔥</span>
+                        <span onclick="insertEmoji('👍')">👍</span>
+                        <span onclick="insertEmoji('💙')">💙</span>
+                        <span onclick="insertEmoji('🚀')">🚀</span>
+                        <span onclick="insertEmoji('✨')">✨</span>
+                        <span onclick="insertEmoji('😎')">😎</span>
+                        <span onclick="insertEmoji('🎉')">🎉</span>
+                        <span onclick="insertEmoji('💯')">💯</span>
+                        <span onclick="insertEmoji('⚡')">⚡</span>
+                        <span onclick="insertEmoji('💀')">💀</span>
+                    </div>
+                </div>
+
+                <!-- GIF Picker Popup -->
+                <div class="picker-popup gif-popup" id="gif-picker">
+                    <input type="text" id="gif-search-input" placeholder="Search GIFs (hi, laugh, cat)..." oninput="searchGIFs(this.value)">
+                    <div class="gif-results" id="gif-results-container"></div>
+                </div>
+
+                <div class="chat-input-wrapper">
+                    <input type="text" id="message-input" placeholder="Message #general-chat" onkeypress="handleKeyPress(event)" autocomplete="off">
+                    <button class="action-btn" onclick="togglePicker('emoji-picker')" title="Add Emoji">😀</button>
+                    <button class="action-btn" onclick="togglePicker('gif-picker')" title="Send GIF">🎞️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Sidebar -->
+        <div class="members-sidebar">
+            <h4>Online — <span id="member-count">0</span></h4>
+            <div id="members-list"></div>
+        </div>
+    </div>
+
+    <!-- Socket.io & Logic -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentChannel = 'general-chat';
+        let allChannels = [];
+        let channelMessages = {};
+        
+        let gamesList = [
+            { name: 'Smash Karts', url: 'https://smashkarts.io' },
+            { name: 'Poki Games', url: 'https://poki.com' }
+        ];
+
+        // Theme management
+        function changeTheme(themeName) {
+            document.body.className = '';
+            if (themeName !== 'default') {
+                document.body.classList.add('theme-' + themeName);
+            }
+            localStorage.setItem('selectedTheme', themeName);
+        }
+
+        const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+        document.getElementById('theme-selector').value = savedTheme;
+        changeTheme(savedTheme);
+
+        function tryEnter() {
+            const username = document.getElementById('username-input').value;
+            const answer = document.getElementById('puzzle-input').value;
+            socket.emit('join-chat', { username, answer });
+        }
+
+        socket.on('auth-success', () => {
+            document.getElementById('puzzle-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'grid';
+            renderGames();
+        });
+
+        socket.on('auth-error', (msg) => {
+            document.getElementById('error-msg').innerText = msg;
+        });
+
+        socket.on('init-data', ({ channels, messages }) => {
+            allChannels = channels;
+            channelMessages = messages;
+            renderChannels();
+            renderMessages();
+        });
+
+        socket.on('update-channels', (channels) => {
+            allChannels = channels;
+            if (!allChannels.includes(currentChannel)) {
+                currentChannel = allChannels[0] || 'general-chat';
+            }
+            renderChannels();
+            renderMessages();
+        });
+
+        socket.on('new-message', ({ channel, message }) => {
+            if (!channelMessages[channel]) channelMessages[channel] = [];
+            channelMessages[channel].push(message);
+            if (channelMessages[channel].length > 100) channelMessages[channel].shift();
+            
+            if (channel === currentChannel) {
+                appendMessage(message);
+            }
+        });
+
+        socket.on('update-users', (users) => {
+            const listContainer = document.getElementById('members-list');
+            document.getElementById('member-count').innerText = users.length;
+            listContainer.innerHTML = '';
+            users.forEach(user => {
+                listContainer.innerHTML += `
+                    <div class="member-item">
+                        <div class="member-dot"></div>
+                        <span>${user}</span>
+                    </div>
+                `;
+            });
+        });
+
+        function renderChannels() {
+            const container = document.getElementById('channel-list-container');
+            container.innerHTML = '';
+            allChannels.forEach(ch => {
+                const isActive = ch === currentChannel;
+                container.innerHTML += `
+                    <div class="channel-item ${isActive ? 'active' : ''}" onclick="switchChannel('${ch}')">
+                        <span># ${ch}</span>
+                        <div class="channel-actions">
+                            <button onclick="event.stopPropagation(); renameChannel('${ch}')" title="Rename">✏️</button>
+                            ${allChannels.length > 1 ? `<button onclick="event.stopPropagation(); deleteChannel('${ch}')" title="Delete">🗑️</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('current-channel-title').innerText = `# ${currentChannel}`;
+            document.getElementById('message-input').placeholder = `Message #${currentChannel}`;
+        }
+
+        function renderGames() {
+            const container = document.getElementById('games-list-container');
+            container.innerHTML = '';
+            gamesList.forEach((game, index) => {
+                container.innerHTML += `
+                    <div class="channel-item" onclick="window.open('${game.url}', '_blank')">
+                        <span>🎮 ${game.name}</span>
+                        <div class="channel-actions">
+                            <button onclick="event.stopPropagation(); deleteGame(${index})" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addGameShortcut() {
+            const name = prompt('Enter website name (e.g. YouTube):');
+            if (!name) return;
+            let url = prompt('Enter website URL (e.g. https://youtube.com):');
+            if (!url) return;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            gamesList.push({ name, url });
+            renderGames();
+        }
+
+        function deleteGame(index) {
+            gamesList.splice(index, 1);
+            renderGames();
+        }
+
+        function switchChannel(ch) {
+            currentChannel = ch;
+            renderChannels();
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            const messages = channelMessages[currentChannel] || [];
+            messages.forEach(msg => appendMessage(msg));
+        }
+
+        function createNewChannel() {
+            const name = prompt('Enter new channel name:');
+            if (name) {
+                socket.emit('create-channel', name);
+            }
+        }
+
+        function renameChannel(oldName) {
+            const newName = prompt(`Rename channel #${oldName} to:`, oldName);
+            if (newName && newName !== oldName) {
+                socket.emit('rename-channel', { oldName, newName });
+            }
+        }
+
+        function deleteChannel(chName) {
+            if (confirm(`Are you sure you want to delete #${chName}?`)) {
+                socket.emit('delete-channel', chName);
+            }
+        }
+
+        function togglePicker(pickerId) {
+            const emojiPicker = document.getElementById('emoji-picker');
+            const gifPicker = document.getElementById('gif-picker');
+            
+            if (pickerId === 'emoji-picker') {
+                gifPicker.style.display = 'none';
+                emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+            } else {
+                emojiPicker.style.display = 'none';
+                gifPicker.style.display = gifPicker.style.display === 'block' ? 'none' : 'block';
+                if (gifPicker.style.display === 'block') {
+                    searchGIFs('hi');
+                }
+            }
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('message-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emoji-picker').style.display = 'none';
+        }
+
+        // Robust Built-In Working GIF Engine
+        const gifDatabase = {
+            'hi': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWkxbjJycjY5NXd4dWp5MWlhNXp4ZnAxdGxsNXdzZjExNnhnZGx6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dzaUXpzG598A/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI3enIza3h0eTlxdnpsa290NzB6czZmcHJua3EydGk4NXF2eTFnbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgG50ksrxR4gE36/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y1b255NDB2MWYxOTJ0bmZucXJsdXo3bGFidXZ6bmVhdmlhNzNkayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LpCjT1n8r5sP6/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOW82Z3B6cGtrNnVzNm9sMjh3bnpkbTNubzEydTlsdXBwazEwcnZubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif'
+            ],
+            'laugh': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndic290OXE0NXRpd2UydHlscGppNm41a2p1NDIzaGJvOWd0cmRwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26fpQqSndz3q1jVPG/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWZ3dGJocWpma3l6bnJwcTFxMGZtYmZreGozZW5sN3ExMHV1ZndwciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xK20vQXBwL2dpZi5naWY/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDVrbGR1NjRhdHN4bXZxcnVvNmprMmJtcmg2MmdsYXQ3a3VmbWhndyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/10JhviFuU2g36/giphy.gif'
+            ],
+            'dance': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1bTN5c2V5cXZqb2pjcWNqZXNrcG45bXZxN3hnbnF2ZnM5NW5tbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oKIPnAiaMCws8nOsE/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWVmNXd4OGZrcjR0OHF4cXdsaHBhNXpxdmdvOXJ5bThxY2N4dHR4ZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0MYt5jPR6QX5pnqM/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGN5bnhzZWtrYnd6ZTh0a2lhaXRpMWNxejhxeW50bWN0MWR5aG43OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ov5NiLVXT8JEc/giphy.gif'
+            ],
+            'fire': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmR5amF1bXR3d3FicnB2YnFhNWppdTRuOGpxN3RycW8ycXQ4dWRvNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/10avZ0rqdGFyFG/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndic290OXE0NXRpd2UydHlscGppNm41a2p1NDIzaGJvOWd0cmRwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L2fi149VCO6v6/giphy.gif'
+            ],
+            'love': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExajFvN293OG9ocWh5dzB2OXFhZXN3cTNqNmJqbGN4bzlnY3hyMWZpZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oriO0OEd9QIDdllqo/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z5OHB0OXA2dzdhdW9qNXFsa2h1MnhrbHhqdHJ1bXN4NXRjZGN6MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/2dK0W3oUksQk0Xz8OK/giphy.gif'
+            ],
+            'gaming': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWd0dHFwNXk4YmIyb2R1N2xsaWR4bWRqbmlqZnB4anV5Y2l0eDFrayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cFkiFMDg3I5IAbxRfy/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXZjMjU2dW4xYnZkOHMwa3U2aWJ6c2V4bnJocHRqbjQ5cHV6czB5ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/artj92V8o75VPL7AeQ/giphy.gif'
+            ]
+        };
+
+        function searchGIFs(query) {
+            const container = document.getElementById('gif-results-container');
+            const term = query.trim().toLowerCase();
+            
+            let matchedGIFs = [];
+            if (!term) {
+                matchedGIFs = gifDatabase['hi'];
+            } else {
+                for (let key in gifDatabase) {
+                    if (key.includes(term) || term.includes(key)) {
+                        matchedGIFs = matchedGIFs.concat(gifDatabase[key]);
+                    }
+                }
+                if (matchedGIFs.length === 0) {
+                    // Default fallback collection matching search inputs
+                    matchedGIFs = [
+                        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWkxbjJycjY5NXd4dWp5MWlhNXp4ZnAxdGxsNXdzZjExNnhnZGx6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dzaUXpzG598A/giphy.gif',
+                        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI3enIza3h0eTlxdnpsa290NzB6czZmcHJua3EydGk4NXF2eTFnbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgG50ksrxR4gE36/giphy.gif',
+                        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndic290OXE0NXRpd2UydHlscGppNm41a2p1NDIzaGJvOWd0cmRwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26fpQqSndz3q1jVPG/giphy.gif',
+                        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOW82Z3B6cGtrNnVzNm9sMjh3bnpkbTNubzEydTlsdXBwazEwcnZubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif'
+                    ];
+                }
+            }
+
+            container.innerHTML = '';
+            matchedGIFs.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.onclick = () => {
+                    socket.emit('send-message', { channel: currentChannel, text: `<img src="${url}" alt="GIF"/>` });
+                    document.getElementById('gif-picker').style.display = 'none';
+                };
+                container.appendChild(img);
+            });
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('message-input');
+                const text = input.value.trim();
+                if (text) {
+                    socket.emit('send-message', { channel: currentChannel, text });
+                    input.value = '';
+                }
+            }
+        }
+
+        function appendMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const msgDiv = document.createElement('div');
+            
+            if (msg.system) {
+                msgDiv.className = 'message system-msg';
+                msgDiv.innerHTML = `<div class="msg-text">${msg.text}</div>`;
+            } else {
+                msgDiv.className = 'message';
+                msgDiv.innerHTML = `
+                    <div class="msg-user">${msg.user}<span>Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+                    <div class="msg-text">${msg.text}</div>
+                `;
+            }
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
