@@ -3,49 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Gate & Chat</title>
+    <title>Puzzle Gate & Bloody Chat</title>
     <style>
         :root {
-            --bg-dark: #313338;
-            --bg-sidebar: #2b2d31;
-            --bg-server: #1e1f22;
-            --text-normal: #dbdee1;
-            --text-muted: #949ba4;
-            --accent: #5865f2;
-            --accent-hover: #4752c4;
-            --input-bg: #383a40;
+            --bg-dark: #120507;
+            --bg-sidebar: #1a080a;
+            --bg-server: #0b0203;
+            --text-normal: #f0d5d8;
+            --text-muted: #a67a80;
+            --accent: #8b0000;
+            --accent-hover: #b22222;
+            --input-bg: #240a0d;
+            --blood-glow: rgba(139, 0, 0, 0.4);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-normal); height: 100vh; overflow: hidden; }
 
+        /* Puzzle Gate Screen */
         #puzzle-screen {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #1e1f22, #2b2d31);
+            background: linear-gradient(135deg, #0b0203, #240a0d);
         }
         .puzzle-card {
-            background: #2b2d31;
+            background: var(--bg-sidebar);
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 32px var(--blood-glow);
+            border: 1px solid var(--accent);
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
-        .puzzle-card h2 { margin-bottom: 20px; color: #fff; }
+        .puzzle-card h2 { margin-bottom: 20px; color: #ff4d4d; text-shadow: 0 0 10px var(--blood-glow); }
         .puzzle-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
         .puzzle-card input {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
             background: var(--input-bg);
-            border: 1px solid #1e1f22;
+            border: 1px solid var(--accent);
             border-radius: 4px;
             color: #fff;
             font-size: 16px;
         }
+        .puzzle-card input:focus { outline: none; border-color: #ff4d4d; box-shadow: 0 0 8px var(--blood-glow); }
         .puzzle-card button {
             width: 100%;
             padding: 10px;
@@ -56,44 +60,54 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 16px;
+            transition: background 0.2s;
         }
-        .puzzle-card button:hover { background: var(--accent-hover); }
-        #error-msg { color: #f23f43; font-size: 13px; margin-top: 10px; }
+        .puzzle-card button:hover { background: var(--accent-hover); box-shadow: 0 0 12px var(--accent-hover); }
+        #error-msg { color: #ff6b6b; font-size: 13px; margin-top: 10px; }
 
+        /* Discord UI Layout */
         #chat-screen {
             display: none;
             height: 100vh;
-            grid-template-columns: 240px 1fr 240px;
+            grid-template-columns: 80px 260px 1fr 240px;
         }
         
-        .servers-sidebar { background: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; }
-        .server-icon { width: 48px; height: 48px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; }
+        /* Servers Sidebar */
+        .servers-sidebar { background: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; border-right: 1px solid #2b0509; }
+        .server-icon { width: 48px; height: 48px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 0 10px var(--blood-glow); }
 
-        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #1f2023; }
+        /* Channels Sidebar */
+        .channels-sidebar { background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 16px; border-right: 1px solid #2b0509; }
         .channels-sidebar h3 { font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
-        .channel-item { padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; }
-        .channel-item.active { background: #404249; color: #fff; }
+        .channel-item { padding: 8px 10px; border-radius: 4px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: background 0.2s, color 0.2s; }
+        .channel-item:hover { background: #33080d; color: #fff; }
+        .channel-item.active { background: var(--accent); color: #fff; box-shadow: 0 0 8px var(--blood-glow); }
 
-        .chat-main { display: flex; flex-direction: column; background: var(--bg-dark); height: 100vh; }
-        .chat-header { height: 48px; border-bottom: 1px solid #1f2023; display: flex; align-items: center; padding: 0 16px; font-weight: bold; font-size: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        /* Main Chat Area (Expanded) */
+        .chat-main { display: flex; flex-direction: column; background: var(--bg-dark); height: 100vh; flex: 1; }
+        .chat-header { height: 48px; border-bottom: 1px solid #2b0509; display: flex; align-items: center; padding: 0 20px; font-weight: bold; font-size: 16px; color: #ff6b6b; box-shadow: 0 1px 4px rgba(139,0,0,0.2); }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         .message { display: flex; flex-direction: column; }
-        .message .msg-user { font-weight: 600; font-size: 14px; color: #fff; margin-bottom: 2px; }
+        .message .msg-user { font-weight: 600; font-size: 14px; color: #ff8080; margin-bottom: 2px; }
         .message .msg-user span { font-weight: normal; font-size: 11px; color: var(--text-muted); margin-left: 6px; }
-        .message .msg-text { font-size: 14px; color: var(--text-normal); word-break: break-word; }
-        .message.system-msg .msg-text { color: var(--text-muted); font-style: italic; font-size: 13px; }
+        .message .msg-text { font-size: 15px; color: var(--text-normal); word-break: break-word; line-height: 1.4; }
+        .message.system-msg .msg-text { color: var(--text-muted); font-style: italic; font-size: 13px; border-left: 2px solid var(--accent); padding-left: 8px; }
 
-        .chat-input-area { padding: 0 16px 24px 16px; }
-        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; padding: 10px 16px; }
+        .chat-input-area { padding: 0 20px 24px 20px; }
+        .chat-input-wrapper { background: var(--input-bg); border-radius: 8px; display: flex; padding: 12px 18px; border: 1px solid #33080d; }
+        .chat-input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 8px var(--blood-glow); }
         .chat-input-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: #fff; font-size: 15px; }
 
-        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #1f2023; overflow-y: auto; }
+        /* Members Sidebar */
+        .members-sidebar { background: var(--bg-sidebar); padding: 16px; border-left: 1px solid #2b0509; overflow-y: auto; }
         .members-sidebar h4 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
         .member-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 14px; color: var(--text-muted); }
-        .member-dot { width: 8px; height: 8px; background: #23a55a; border-radius: 50%; }
+        .member-dot { width: 8px; height: 8px; background: #8b0000; box-shadow: 0 0 6px #ff0000; border-radius: 50%; }
     </style>
 </head>
 <body>
+
+    <!-- Puzzle Gate Screen -->
     <div id="puzzle-screen">
         <div class="puzzle-card">
             <h2>Access Gate</h2>
@@ -105,14 +119,20 @@
         </div>
     </div>
 
+    <!-- Discord UI Chat Screen -->
     <div id="chat-screen">
+        <!-- Servers Sidebar -->
         <div class="servers-sidebar">
             <div class="server-icon" title="Main Server">PS</div>
         </div>
+
+        <!-- Channels Sidebar -->
         <div class="channels-sidebar">
             <h3>Text Channels</h3>
             <div class="channel-item active"># general-chat</div>
         </div>
+
+        <!-- Chat Main Container -->
         <div class="chat-main">
             <div class="chat-header"># general-chat</div>
             <div class="chat-messages" id="messages-container"></div>
@@ -122,12 +142,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Members Sidebar -->
         <div class="members-sidebar">
             <h4>Online — <span id="member-count">0</span></h4>
             <div id="members-list"></div>
         </div>
     </div>
 
+    <!-- Include Socket.io Client Library -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -185,6 +208,7 @@
         function appendMessage(msg) {
             const container = document.getElementById('messages-container');
             const msgDiv = document.createElement('div');
+            
             if (msg.system) {
                 msgDiv.className = 'message system-msg';
                 msgDiv.innerHTML = `<div class="msg-text">${msg.text}</div>`;
