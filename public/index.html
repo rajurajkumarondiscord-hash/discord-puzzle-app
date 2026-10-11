@@ -286,7 +286,7 @@
 
                 <!-- GIF Picker Popup -->
                 <div class="picker-popup gif-popup" id="gif-picker">
-                    <input type="text" id="gif-search-input" placeholder="Search GIFs (hi, laugh, cat)..." oninput="searchGIFs(this.value)">
+                    <input type="text" id="gif-search-input" placeholder="Search GIFs (hi, laugh, dance, cat)..." oninput="searchGIFs(this.value)">
                     <div class="gif-results" id="gif-results-container"></div>
                 </div>
 
@@ -494,7 +494,7 @@
             document.getElementById('emoji-picker').style.display = 'none';
         }
 
-        // Robust Built-In Working GIF Engine
+        // Expanded Multi-Tag Built-In GIF Database
         const gifDatabase = {
             'hi': [
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWkxbjJycjY5NXd4dWp5MWlhNXp4ZnAxdGxsNXdzZjExNnhnZGx6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dzaUXpzG598A/giphy.gif',
@@ -502,10 +502,18 @@
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y1b255NDB2MWYxOTJ0bmZucXJsdXo3bGFidXZ6bmVhdmlhNzNkayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LpCjT1n8r5sP6/giphy.gif',
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOW82Z3B6cGtrNnVzNm9sMjh3bnpkbTNubzEydTlsdXBwazEwcnZubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif'
             ],
+            'hello': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWkxbjJycjY5NXd4dWp5MWlhNXp4ZnAxdGxsNXdzZjExNnhnZGx6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dzaUXpzG598A/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI3enIza3h0eTlxdnpsa290NzB6czZmcHJua3EydGk4NXF2eTFnbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgG50ksrxR4gE36/giphy.gif'
+            ],
             'laugh': [
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndic290OXE0NXRpd2UydHlscGppNm41a2p1NDIzaGJvOWd0cmRwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26fpQqSndz3q1jVPG/giphy.gif',
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWZ3dGJocWpma3l6bnJwcTFxMGZtYmZreGozZW5sN3ExMHV1ZndwciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xK20vQXBwL2dpZi5naWY/giphy.gif',
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDVrbGR1NjRhdHN4bXZxcnVvNmprMmJtcmg2MmdsYXQ3a3VmbWhndyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/10JhviFuU2g36/giphy.gif'
+            ],
+            'funny': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndic290OXE0NXRpd2UydHlscGppNm41a2p1NDIzaGJvOWd0cmRwZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26fpQqSndz3q1jVPG/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWZ3dGJocWpma3l6bnJwcTFxMGZtYmZreGozZW5sN3ExMHV1ZndwciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xK20vQXBwL2dpZi5naWY/giphy.gif'
             ],
             'dance': [
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1bTN5c2V5cXZqb2pjcWNqZXNrcG45bXZxN3hnbnF2ZnM5NW5tbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oKIPnAiaMCws8nOsE/giphy.gif',
@@ -523,6 +531,10 @@
             'gaming': [
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWd0dHFwNXk4YmIyb2R1N2xsaWR4bWRqbmlqZnB4anV5Y2l0eDFrayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cFkiFMDg3I5IAbxRfy/giphy.gif',
                 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXZjMjU2dW4xYnZkOHMwa3U2aWJ6c2V4bnJocHRqbjQ5cHV6czB5ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/artj92V8o75VPL7AeQ/giphy.gif'
+            ],
+            'cat': [
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y1b255NDB2MWYxOTJ0bmZucXJsdXo3bGFidXZ6bmVhdmlhNzNkayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JIX9t2j0ZTN9S/giphy.gif',
+                'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI3enIza3h0eTlxdnpsa290NzB6czZmcHJua3EydGk4NXF2eTFnbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/XreQmk7ETCak0/giphy.gif'
             ]
         };
 
@@ -532,15 +544,19 @@
             
             let matchedGIFs = [];
             if (!term) {
-                matchedGIFs = gifDatabase['hi'];
+                // Default display when popup opens
+                for (let key in gifDatabase) {
+                    matchedGIFs = matchedGIFs.concat(gifDatabase[key]);
+                }
             } else {
+                // Search matching tags
                 for (let key in gifDatabase) {
                     if (key.includes(term) || term.includes(key)) {
                         matchedGIFs = matchedGIFs.concat(gifDatabase[key]);
                     }
                 }
+                // If specific term doesn't match keys, show a broad mix so results never appear empty
                 if (matchedGIFs.length === 0) {
-                    // Default fallback collection matching search inputs
                     matchedGIFs = [
                         'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWkxbjJycjY5NXd4dWp5MWlhNXp4ZnAxdGxsNXdzZjExNnhnZGx6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dzaUXpzG598A/giphy.gif',
                         'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI3enIza3h0eTlxdnpsa290NzB6czZmcHJua3EydGk4NXF2eTFnbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgG50ksrxR4gE36/giphy.gif',
